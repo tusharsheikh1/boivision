@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('order_id')->unique()->nullable();
             $table->string('invoice')->unique()->nullable();
-            $table->string('first_name');
+            $table->string('first_name')->nullable();
             $table->string('last_name');
             $table->string('company_name')->nullable();
             $table->string('country');

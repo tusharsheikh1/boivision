@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\Campaign::class,
         Commands\SmsManagementCommand::class, // Add SMS management command
+        Commands\SyncDeliveryStatus::class, // Add delivery tracking command
     ];
 
     /**
@@ -30,6 +31,18 @@ class Kernel extends ConsoleKernel
         
         // Optional: Schedule SMS cleanup (runs daily at 2 AM)
         $schedule->command('sms:manage clean --days=30')->dailyAt('02:00');
+        
+        // Sync delivery status every 30 minutes for pending orders
+        $schedule->command('orders:sync-delivery-status --limit=50')
+                 ->everyThirtyMinutes()
+                 ->withoutOverlapping()
+                 ->runInBackground();
+        
+        // Daily sync for all orders sent to courier (runs at 3 AM)
+        $schedule->command('orders:sync-delivery-status --limit=200')
+                 ->dailyAt('03:00')
+                 ->withoutOverlapping()
+                 ->runInBackground();
     }
 
     /**

@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Redirect;
 use App\Library\UddoktaPay;
 use DB;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class BuyNowService
 {
@@ -25,11 +27,13 @@ class BuyNowService
      */
     public function orderBuyNowStore_minimal(Request $request)
     {
+        Log::info('Initial request data for minimal order: ', $request->all()); // Debug initial request
+
         $phoneMinDigits = empty(setting('phone_min_dgt')) ? 11 : setting('phone_min_dgt');
         $phoneMaxDigits = empty(setting('phone_max_dgt')) ? 11 : setting('phone_max_dgt');
         $request->email = empty($request->email) ? 'noreply@lems.shop' : $request->email;
 
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'first_name'      => 'required|string|max:255',
             'last_name'       => 'nullable|string|max:255',
             'company'         => 'nullable|string|max:255',
@@ -50,6 +54,11 @@ class BuyNowService
             'branch'          => 'nullable|string|max:255',
             'routing'         => 'nullable|string|max:255',
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Validation failed: ', $validator->errors()->all());
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         $product = Product::find($request->id);
         $shipping_charge = $this->calculateShippingForProduct($product, $request);
@@ -79,7 +88,12 @@ class BuyNowService
             }
         }
 
+        // Force fallback for first_name before creating order
+        $firstName = $request->input('first_name', 'Guest');
+        Log::info('Using first_name for order creation: ' . $firstName); // Debug the value used
+
         $order = $this->createBuyNowOrder($request, $product, $shipping_charge, $subtotal, $discount, $total, $coupon_code);
+        Log::info('Order created with ID: ' . $order->id); // Log order creation
         $this->generateOrderId($order);
 
         $price = $this->getProductPrice($product, $request);
@@ -304,9 +318,10 @@ class BuyNowService
 
     private function createBuyNowOrder($request, $product, $shipping_charge, $subtotal, $discount, $total, $coupon_code)
     {
+        Log::info('Creating order with data: ', $request->all()); // Debug data before creation
         return Order::create([
             'user_id'         => auth()->id(),
-            'first_name'      => $request->first_name,
+            'first_name'      => $request->input('first_name', 'Guest'), // Fallback to 'Guest' if missing
             'last_name'       => $request->last_name,
             'company_name'    => $request->company,
             'country'         => $request->country,
@@ -535,6 +550,7 @@ class BuyNowService
         }
 
         $order = $this->createBuyNowOrderWithAuth($request, $product, $shipping_charge, $subtotal, $discount, $total, $coupon_code, $isGuest);
+        Log::info('Order created with ID (processBuyNowOrder): ' . $order->id); // Log order creation
         $this->generateOrderId($order);
 
         $price = $this->getProductPrice($product, $request);
@@ -590,8 +606,9 @@ class BuyNowService
 
     private function createBuyNowOrderWithAuth($request, $product, $shipping_charge, $subtotal, $discount, $total, $coupon_code, $isGuest)
     {
+        Log::info('Creating order with auth data: ', $request->all()); // Debug data before creation
         $orderData = [
-            'first_name'      => $request->first_name,
+            'first_name'      => $request->input('first_name', 'Guest'), // Fallback to 'Guest' if missing
             'last_name'       => $request->last_name,
             'company_name'    => $request->company,
             'country'         => $request->country,
@@ -684,7 +701,7 @@ class BuyNowService
             'cus_postcode' => $request->postcode,
             'cus_country' => 'Bangladesh',
             'cus_phone' => $request->phone,
-            'cus_fax' => 'Not¬Applicable',
+            'cus_fax' => 'NotÂ¬Applicable',
             'ship_name' => $request->first_name . $request->last_name,
             'ship_add1' => $request->address,
             'ship_add2' => $request->address,

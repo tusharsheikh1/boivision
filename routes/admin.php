@@ -28,12 +28,11 @@ use App\Http\Controllers\Admin\Ecommerce\ProductController;
 use App\Http\Controllers\Admin\Ecommerce\ProfileController;
 use App\Http\Controllers\Admin\Ecommerce\SettingController;
 use App\Http\Controllers\Admin\Ecommerce\CategoryController;
-
 use App\Http\Controllers\Admin\Ecommerce\CustomerController;
 use App\Http\Controllers\Admin\Ecommerce\DashboardController;
 use App\Http\Controllers\Admin\Ecommerce\CollectionController;
 use App\Http\Controllers\Admin\Ecommerce\SubCategoryController;
-
+use App\Http\Controllers\Admin\Ecommerce\DeliveryTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,15 +47,10 @@ use App\Http\Controllers\Admin\Ecommerce\SubCategoryController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
-
     // System Update
     Route::get('/update', [SystemController::class, 'updateIndex'])->name('updateIndex');
     Route::post('/update', [SystemController::class, 'update'])->name('update');
     Route::get('/php_info', [SystemController::class, 'php_info'])->name('info');
-
-
-
-
 
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
@@ -94,7 +88,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('vendor', VendorController::class);
     Route::get('vendor/change-pass/{id}', [VendorController::class, 'change_passIndex'])->name('vendor.change_pass_index');
     Route::put('vendor/change-pass/{id}', [VendorController::class, 'change_pass'])->name('vendor.change_pass');
-    // Route::post('author/update/{vid}',[AuthController::class,'update'])->name('author.update');
     Route::get('vendor/product/{vid}', [VendorController::class, 'Vproduct'])->name('vendor.product');
     Route::get('vendor_status/{id}', [VendorController::class, 'vendor_status'])->name('vendor_status');
     Route::get('vendor/withdraw/list', [WithdrawController::class, 'allwithlist'])->name('vendor.withdraw');
@@ -116,12 +109,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::Post('staf/store', [StafController::class, 'store'])->name('staff.store');
     Route::get('staf/list', [StafController::class, 'stafflist'])->name('staff.list');
 
-
     Route::get('staf/{id}/edit', [StafController::class, 'staffEdit'])->name('staff.edit');
     Route::get('mail', [ticketController::class, 'mail'])->name('mail');
     Route::get('mail/show/{id}', [ticketController::class, 'mailShow'])->name('mail.show');
     Route::get('mail/{id}', [ticketController::class, 'maildelete'])->name('mail.delete');
-
 
     Route::get('subscribe', [subscriptionController::class, 'show'])->name('subscribe');
     Route::get('ticket', [ticketController::class, 'index'])->name('ticket');
@@ -177,7 +168,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('extra-categories/edit/{edit}', [SubCategoryController::class, 'extracategoryEdit'])->name('extracategory.edit');
     Route::post('extra-categories/edit', [SubCategoryController::class, 'extracategoryUpdate'])->name('edit.extra');
 
-
     Route::post('product/order', [CustomOrderController::class, 'orderProductStore'])->name('product.order.store');
     Route::get('product/order/{id}', [CustomOrderController::class, 'orderProduct'])->name('product.order');
     Route::get('apply/coupon/{code}/{id}', [CustomOrderController::class, 'applyCoupon'])->name('apply.coupon');
@@ -194,7 +184,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::Post('campaing/create/data', [campaingController::class, 'getData'])->name('campaing.getData');
     Route::Post('campaing/store', [campaingController::class, 'store'])->name('campaing.store');
     Route::Post('campaing/update', [campaingController::class, 'update'])->name('campaing.update');
-
 
     // order controller
     Route::group(['as' => 'order.', 'prefix' => 'order'], function () {
@@ -224,6 +213,17 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('send-sms', [OrderController::class, 'sendCustomSms'])->name('send.sms');
     });
 
+    // Delivery Tracking Routes - NEW
+    Route::group(['as' => 'delivery.', 'prefix' => 'delivery'], function () {
+        Route::get('/', [DeliveryTrackingController::class, 'index'])->name('index');
+        Route::get('/show/{id}', [DeliveryTrackingController::class, 'show'])->name('show');
+        Route::post('/send-to-courier/{id}', [DeliveryTrackingController::class, 'sendToCourier'])->name('send-courier');
+        Route::post('/update-status/{id}', [DeliveryTrackingController::class, 'updateStatus'])->name('update-status');
+        Route::post('/bulk-update', [DeliveryTrackingController::class, 'bulkUpdateStatus'])->name('bulk-update');
+        Route::get('/balance', [DeliveryTrackingController::class, 'getBalance'])->name('balance');
+        Route::get('/export', [DeliveryTrackingController::class, 'exportReport'])->name('export');
+    });
+
     Route::get('/blogs', [ablogController::class, 'index'])->name('index');
     Route::get('/user-blogs', [ablogController::class, 'index2'])->name('user_blog');
     Route::get('/Create-new-blog', [ablogController::class, 'new_blog_form'])->name('new_blog');
@@ -233,7 +233,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/blog-delete/{id}', [ablogController::class, 'destory'])->name('blog_delete');
     Route::get('/blog-edit/{id}', [ablogController::class, 'blog_edit_form'])->name('blog_edit');
     Route::post('/blog-update', [ablogController::class, 'update_exit_blog'])->name('update_exit_blog');
-
 
     // Auth User Profile Define Here....
     Route::group(['as' => 'profile.', 'prefix' => 'profile'], function () {
@@ -270,7 +269,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/live-chat/status/{id}', [ChatController::class, 'updateStatus']);
     });
 
-
     Route::get('shop', [SettingController::class, 'showShop'])->name('shop');
     Route::put('shop/update', [SettingController::class, 'shopUpdate'])->name('shop.update');
 
@@ -280,7 +278,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('setting/logo', [SettingController::class, 'updateLogo'])->name('update.logo');
 
     Route::get('notice', [SettingController::class, 'noticeIndex'])->name('notice_index');
-
 
     Route::get('setting/site_info', [SettingController::class, 'shop_infoIndex'])->name('setting.site_info');
     Route::get('setting/layout', [SettingController::class, 'layoutIndex'])->name('setting.layout');
@@ -293,7 +290,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::get('setting/mailsmsapireglog', [SettingController::class, 'mailsmsapireglogIndex'])->name('setting.mailsmsapireglog');
 
-    // Route::get('setting/social', [SettingController::class, 'social'])->name('setting.social');
     Route::get('setting/getway', [SettingController::class, 'getway'])->name('setting.getway');
     Route::post('setting/getway', [SettingController::class, 'setting_g'])->name('setting_g');
     Route::get('setting/docs', [SettingController::class, 'docs'])->name('setting.docs');

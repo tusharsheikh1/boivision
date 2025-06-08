@@ -22,6 +22,7 @@ use App\Http\Controllers\Frontend\ContactController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\wishlistController;
+use App\Http\Controllers\Frontend\TrackingController;
 use App\Http\Controllers\blogControler as ablogController;
 
 /*
@@ -88,7 +89,6 @@ Route::middleware(['auth'])->group(function () {
 Route::Post('/get/color/price', [ProductController::class, 'getAttrPrice']);
 Route::Post('/get/attr/price', [ProductController::class, 'getAttrPrice']);
 
-
 Route::get('vendor/search/product', [VendorController::class, 'productSearch'])->name('search.product.vendor');
 
 Route::get('cart', [CartController::class, 'cart'])->name('cart');
@@ -103,8 +103,10 @@ Route::get('checkout', [CheckoutController::class, 'checkout'])->name('checkout'
 Route::get('/render/superCat', [HomeController::class, 'superCat']);
 Route::get('/render/subCat', [HomeController::class, 'subCat']);
 
-
-
+// Public tracking routes - NEW
+Route::get('/track-order', [TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/track-order', [TrackingController::class, 'track'])->name('tracking.track');
+Route::post('/tracking/status', [TrackingController::class, 'getStatus'])->name('tracking.status');
 
 Route::middleware(['account', 'auth'])->group(function () {
     Route::group(['as' => 'connection.', 'prefix' => 'connection'], function () {
@@ -113,7 +115,6 @@ Route::middleware(['account', 'auth'])->group(function () {
         Route::get('/live-chat-list', [chatController::class, 'liveChatList'])->name('live.chat.list');
         Route::post('/live-chat', [chatController::class, 'storeLiveChatForm'])->name('store.chat');
     });
-
 
     Route::get('account/password', [AccountController::class, 'passChangeUser'])->name('pass-change');
     Route::put('password/update', [ProfileController::class, 'updatePassword'])->name('password.update');
@@ -126,6 +127,8 @@ Route::middleware(['account', 'auth'])->group(function () {
     Route::post('order/tracking', [HomeController::class, 'tracking'])->name('tracking');
     Route::get('order/tracking', [HomeController::class, 'track_form'])->name('tracking.re');
 
+    // Authenticated user tracking - NEW
+    Route::get('/my-orders/{orderId}/track', [TrackingController::class, 'trackUserOrder'])->name('tracking.user-order');
 
     Route::post('account/update', [AccountController::class, 'accountUpdate'])->name('account.update');
     Route::get('apply/coupon/{code}/{stotal}', [CartController::class, 'applyCoupon'])->name('apply.coupon');
@@ -139,10 +142,8 @@ Route::middleware(['account', 'auth'])->group(function () {
     Route::get('order/return_req/{id}', [OrderController::class, 'return_req'])->name('order.return_req');
     // Route::get('buy/product', [OrderController::class, 'buyProduct'])->name('buy.product');
 
-
     Route::get('download', [OrderController::class, 'download'])->name('download');
     Route::get('download/product/{pro_id}/{id}', [OrderController::class, 'downloadProductFile'])->name('download.product');
-
 
     Route::get('review/{order_id}', [OrderController::class, 'review'])->name('review');
     Route::post('review/{id}', [OrderController::class, 'storeReview'])->name('review.store');
@@ -152,18 +153,15 @@ Route::middleware(['account', 'auth'])->group(function () {
     Route::get('ticket/', [ContactController::class, 'ticket'])->name('ticket');
     Route::post('ticket/create', [ContactController::class, 'ticketCreate'])->name('ticket.create');
 
-
     Route::get('/user-blogs', [ablogController::class, 'index3'])->name('user_blog');
     Route::get('/redem', [AccountController::class, 'redem'])->name('redem.index');
     Route::get('/cashout', [AccountController::class, 'cashout'])->name('redem.cashout');
     Route::Post('/withdraw', [AccountController::class, 'withdraw'])->name('redem.withdraw');
     Route::post('/redem/covert', [AccountController::class, 'covert'])->name('redem.convert');
     
-    
     Route::get("/myrefer", function () {
         return View::make("frontend.myrefer");
     })->name('myrefer');
-
 
     Route::post('/create-blog', [ablogController::class, 'store2'])->name('create_blog');
     Route::get('blog/status/{blog}', [ablogController::class, 'status'])->name('blog.status');
@@ -183,7 +181,6 @@ Route::middleware(['account', 'auth'])->group(function () {
     Route::Post('order/payment/create/{slug}', [OrderController::class, 'payCreate'])->name('order.pay.create');
 });
 
-
 Route::get('/classic/product/{slug}', [adsController::class, 'show'])->name('clasified.show');
 Route::get('/{slug}', [pageController::class, 'pageshow'])->name('page');
 Route::middleware(['auth', 'customer'])->group(function () {
@@ -191,13 +188,10 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::post('setup/vendor', [VendorController::class, 'setupVendor'])->name('setup.vendor');
 });
 
-
-
 Route::middleware(['auth'])->group(function () {
     Route::post('product/comment/{slug}', [ProductController::class, 'comment'])->name('comment');
     // Route::post('product/comment/reply/{slug}/{id}', [ProductController::class, 'reply'])->name('reply');
 });
-
 
 Route::get('service/form', [ContactController::class, 'service'])->name('service');
 Route::get('sheba/list', [HomeController::class, 'sheba'])->name('sheba');
@@ -210,12 +204,10 @@ Route::post('subscription', [subscriptionController::class, 'store'])->name('sub
 Route::post('order_guest', [OrderController::class, 'orderStore_guest'])->name('order.store_guest');
 Route::post('order_minimal', [OrderController::class, 'orderStore_minimal'])->name('order.store_minimal');
 
-
 // direct buy
 Route::get('buy/product', [OrderController::class, 'buyProduct'])->name('buy.product');
 Route::post('order/buy-now_guest', [OrderController::class, 'orderBuyNowStore_guest'])->name('order.buy.store_guest');
 Route::post('order/buy-now_minimal', [OrderController::class, 'orderBuyNowStore_minimal'])->name('order.buy.store_minimal');
-
 
 /** Google OAuth routes */
 Route::get('/auth/google/redirect', [socialController::class, 'handleGoogleRedirect']);
@@ -224,18 +216,12 @@ Route::get('/auth/google/callback', [socialController::class, 'handleGoogleCallb
 Route::get('/auth/facebook/redirect', [socialController::class, 'handleFacebookRedirect']);
 Route::get('/auth/facebook/callback', [socialController::class, 'handleFacebookCallback']);
 
-
 Route::post('/save-token', [App\Http\Controllers\HomeController::class, 'saveToken'])->name('save-token');
 Route::post('/send-notification', [App\Http\Controllers\HomeController::class, 'sendNotification'])->name('send.notification');
 Route::post('register/send-otp', [RegisterController::class, 'sendotp'])->name('sendotp');
 
-
-
 Route::post('/success', [OrderController::class, 'success'])->name('success');
 Route::post('/fail', [OrderController::class, 'fail'])->name('fail');
-
-
-
 
 Route::get('/cache', function () {
     Artisan::call('cache:clear');
@@ -245,7 +231,6 @@ Route::get('/cache', function () {
     Artisan::call('storage:link');
     return 1;
 });
-
 
 Route::get('/test-sms/{phone}', function($phone) {
     $smsService = new App\Services\SmsService();

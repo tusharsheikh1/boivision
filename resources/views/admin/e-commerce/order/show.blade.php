@@ -325,8 +325,9 @@
                                 <div class="form-group">
                                     <label for="sms_templates"><i class="fas fa-list text-success"></i> Quick Templates:</label>
                                     <select class="form-control" id="sms_templates" onchange="loadTemplate()">
-                                        <option value="">Select a template...</option>
-                                        <option value="Your order {invoice} is being prepared. We will notify you once it's ready for delivery. Thank you!">Order Preparation</option>
+                                    <option value="">Select a template...</option>
+                                        <option value="Your উ order {invoice} is being prepared. We will notify you once it's ready for delivery. Thank you!">Order Preparation</option>
+                                        <option value="Hi {customer_name}, your order {invoice} is out for delivery and will reach you soon. Please keep your phone available.">Out for Delivery</option>
                                         <option value="Hi {customer_name}, your order {invoice} is out for delivery and will reach you soon. Please keep your phone available.">Out for Delivery</option>
                                         <option value="Your order {invoice} has been delivered successfully. Thank you for shopping with us!">Delivery Confirmation</option>
                                         <option value="We apologize for the delay in your order {invoice}. We are working to process it as soon as possible.">Delay Notice</option>
@@ -334,6 +335,7 @@
                                         <option value="Hi {customer_name}, please confirm your delivery address for order {invoice}. Contact us if you need to make changes.">Address Confirmation</option>
                                         <option value="Your order {invoice} is ready for pickup. Please visit our store with a valid ID. Thank you!">Pickup Ready</option>
                                         <option value="Thank you {customer_name} for your order {invoice}! Your order total is {total} TK. We appreciate your business.">Thank You Message</option>
+                                        
                                     </select>
                                 </div>
 

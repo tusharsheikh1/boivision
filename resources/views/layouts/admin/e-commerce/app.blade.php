@@ -477,8 +477,8 @@
         <footer class="admin-footer">
             <div class="container-fluid">
                 সকল কারিগরী সহযোগিতায় 
-                <a href="https://www.elitedesign.com.bd/" target="_blank" title="Elitedesign.com.bd">
-                    এলিট ডিজাইন
+                <a href="https://web.facebook.com/tusharmktjnu/" target="_blank" title="Elitedesign.com.bd">
+                    তুষার শেখ
                 </a>
             </div>
         </footer>
